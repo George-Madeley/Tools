@@ -1,0 +1,27 @@
+{
+  "author": "George Madeley",
+  "description": "A series of tools and scripts to aid in software development",
+  "devDependencies": {
+    "@commitlint/cli": "^19.7.1",
+    "@commitlint/config-conventional": "^19.7.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.4.3"
+  },
+  "keywords": [
+    "tools"
+  ],
+  "license": "ISC",
+  "lint-staged": {
+    "*.py": [
+      "ruff check",
+      "ruff format --in-place"
+    ]
+  },
+  "main": "index.js",
+  "name": "tools",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "1.0.0",
+  "type": "module"
+}
