@@ -13,14 +13,18 @@
   "license": "ISC",
   "lint-staged": {
     "*.py": [
-      "ruff check",
-      "ruff format --in-place"
+      "pipenv run ruff check --fix",
+      "pipenv run ruff format"
     ]
   },
   "main": "index.js",
   "name": "tools",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky",
+    "lint": "pipenv run ruff check",
+    "lint:fix": "pipenv run ruff check --fix",
+    "format": "pipenv run ruff format"
   },
   "version": "1.0.0",
   "type": "module"
