@@ -7,13 +7,13 @@ import re
 
 def main():
   uwd = os.getcwd()
-  chdir()
 
   author = subprocess.run(
     ["git", "config", "--global", "user.name"], capture_output=True, text=True
   )
   author = author.stdout.strip()
-  format_scheme = "\n- %B"
+
+  chdir()
 
   parser = argparse.ArgumentParser(
     description="""
@@ -23,29 +23,19 @@ def main():
     formatter_class=argparse.RawTextHelpFormatter,
   )
   parser.add_argument(
-    "hours",
-    help="The number of hours to get the messages from",
-    type=int,
+    "hours", help="The number of hours to get the messages from", type=int
   )
   parser.add_argument(
-    "-a",
     "--author",
-    help=f"The author of the git commits (default: {author})",
+    help=f'The author of the git commits (default: "{author}")',
     type=str,
     default=author,
   )
   parser.add_argument(
-    "-b",
     "--branch",
     help="The branch to get the commit messages from (default: )",
     type=str,
     default="",
-  )
-  parser.add_argument(
-    "--format",
-    help=f"The format scheme to use (default: {format_scheme})",
-    type=str,
-    default=format_scheme,
   )
   parser.add_argument(
     "--uwd",
@@ -64,28 +54,39 @@ def get_commit_msg(args):
     f"Getting all commit messages for {args.author} from {args.hours} hours ago"
   )
 
+  if not os.path.exists(args.uwd):
+    print(f"Could not find path {args.uwd}")
+    sys.exit(1)
+
+  chdir(args.uwd)
+
   logs = subprocess.run(
     [
       "git",
       "log",
       "--all",
-      f"--format={args.format}",
+      "--format=\n- %B",
       f"--author={args.author}",
       f"--after=format:relative:{args.hours}.hours.ago",
     ],
-    capture_output=True,
+    stdout=subprocess.PIPE,
     text=True,
   )
-  logs = logs.stdout.strip()
-  logs = re.sub(r"\n+", "\n", logs)
 
-  print(logs)
+  if logs.returncode != 0:
+    print(f"Error: {logs.stderr}")
+    sys.exit(1)
+
+  logs = logs.stdout.strip()
+  logs = re.sub(r"\n\n", r"\n\t", logs)
+  print(f"\n{logs}\n")
 
   if os.name == "nt":
     process = subprocess.Popen(["clip"], stdin=subprocess.PIPE, text=True)
     process.communicate(input=logs)
   else:
-    print("OS not supported")
+    process = subprocess.Popen(["pbcopy"], stdin=subprocess.PIPE, text=True)
+    process.communicate(input=logs)
 
   print("Done!")
 
