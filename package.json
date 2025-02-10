@@ -20,12 +20,12 @@
   "main": "index.js",
   "name": "tools",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "husky",
+    "build": "pipenv run python build.py",
+    "format": "pipenv run ruff format",
     "lint": "pipenv run ruff check",
     "lint:fix": "pipenv run ruff check --fix",
-    "format": "pipenv run ruff format"
+    "prepare": "husky"
   },
-  "version": "1.0.0",
-  "type": "module"
+  "type": "module",
+  "version": "1.0.0"
 }
