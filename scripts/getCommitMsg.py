@@ -78,7 +78,9 @@ def get_commit_msg(args):
     sys.exit(1)
 
   logs = logs.stdout.strip()
-  logs = re.sub(r"\n\n", r"\n\t", logs)
+  logs = re.sub(r"\n\n\n", r"\n\t", logs)
+  logs = re.sub(r"\n\n", r"\n\t\t", logs)
+  logs = "\t" + logs
   print(f"\n{logs}\n")
 
   if os.name == "nt":
