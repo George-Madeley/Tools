@@ -78,10 +78,8 @@ def get_commit_msg(args):
     sys.exit(1)
 
   logs = logs.stdout.strip()
-  logs = re.sub(r"\n\n\n", r"\n\t", logs)
-  logs = re.sub(r"\n\n", r"\n\t\t", logs)
-  logs = "\t" + logs
-  print(f"\n{logs}\n")
+  logs = format_commit_messages(logs)
+  print(f"{logs}")
 
   if os.name == "nt":
     process = subprocess.Popen(["clip"], stdin=subprocess.PIPE, text=True)
@@ -91,6 +89,19 @@ def get_commit_msg(args):
     process.communicate(input=logs)
 
   print("Done!")
+
+
+def format_commit_messages(log):
+  formatted_log = []
+  for commit in log.split("\n\n\n"):
+    lines = re.sub(r"\n\n", r"", commit)
+    lines = commit.split("\n")
+    if lines:
+      formatted_log.append(lines[0])
+      for line in lines[1:]:
+        if line != "":
+          formatted_log.append(f"\t{line}")
+  return "\n".join(formatted_log)
 
 
 # ============================================================================ #
