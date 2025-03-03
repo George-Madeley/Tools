@@ -43,42 +43,58 @@ def main():
     type=str,
     default=uwd,
   )
+  parser.add_argument(
+    "--group",
+    help="Whether to group the commits by the branch they come from",
+    action="store_true",
+  )
   args = parser.parse_args()
 
-  get_commit_msg(args)
+  if args.group:
+    group_commit_msg(args)
+  else:
+    get_commit_msg(args, args.branch)
+
+  print("Done!")
 
 
-def get_commit_msg(args):
+def group_commit_msg(args):
   chdir()
-  print(
-    f"Getting all commit messages for {args.author} from {args.hours} hours ago"
-  )
 
   if not os.path.exists(args.uwd):
     print(f"Could not find path {args.uwd}")
     sys.exit(1)
 
   chdir(args.uwd)
-
-  logs = subprocess.run(
-    [
-      "git",
-      "log",
-      "--all",
-      "--format=\n- %B",
-      f"--author={args.author}",
-      f"--after=format:relative:{args.hours}.hours.ago",
-    ],
+  # Get list of all branches
+  branches = subprocess.run(
+    ["git", "branch", "--all", "--format=%(refname:short)"],
     stdout=subprocess.PIPE,
     text=True,
   )
 
-  if logs.returncode != 0:
-    print(f"Error: {logs.stderr}")
+  if branches.returncode != 0:
+    print(f"Error: {branches.stderr}")
     sys.exit(1)
 
-  logs = logs.stdout.strip()
-  logs = format_commit_messages(logs)
+  branches = branches.stdout.strip().split("\n")
+
+  local_branches = []
+  for branch in branches:
+    if not branch.startswith("origin/"):
+      local_branches.append(branch)
+
+  for branch in branches:
+    if branch.replace("origin/", "") not in local_branches:
+      local_branches.append(branch)
+
+  logs = ""
+  for branch in local_branches:
+    branch_logs = get_commit_msg(args, branch)
+    if branch_logs:
+      logs += f"{branch}\n"
+      logs += branch_logs
+      logs += "\n\n"
   print(f"{logs}")
 
   if os.name == "nt":
@@ -88,7 +104,70 @@ def get_commit_msg(args):
     process = subprocess.Popen(["pbcopy"], stdin=subprocess.PIPE, text=True)
     process.communicate(input=logs)
 
-  print("Done!")
+
+def get_commit_msg(args, branch):
+  chdir()
+  if not args.group:
+    print(
+      f"""
+      Getting all commit messages for {args.author} from {args.hours} hours ago
+      """
+    )
+
+  if not os.path.exists(args.uwd):
+    print(f"Could not find path {args.uwd}")
+    sys.exit(1)
+
+  chdir(args.uwd)
+
+  if branch == "":
+    logs = subprocess.run(
+      [
+        "git",
+        "log",
+        "--all",
+        "--format=\n- %B",
+        f"--author={args.author}",
+        f"--after=format:relative:{args.hours}.hours.ago",
+      ],
+      stdout=subprocess.PIPE,
+      text=True,
+    )
+  else:
+    logs = subprocess.run(
+      [
+        "git",
+        "log",
+        branch,
+        "--format=\n- %B",
+        f"--author={args.author}",
+        f"--after=format:relative:{args.hours}.hours.ago",
+      ],
+      stdout=subprocess.PIPE,
+      text=True,
+    )
+
+  if logs.returncode != 0:
+    print(f"Error: {logs.stderr}")
+    sys.exit(1)
+
+  logs = logs.stdout.strip()
+  if logs == "":
+    return ""
+
+  logs = format_commit_messages(logs)
+
+  if not args.group:
+    print(f"{logs}")
+
+  if os.name == "nt":
+    process = subprocess.Popen(["clip"], stdin=subprocess.PIPE, text=True)
+    process.communicate(input=logs)
+  else:
+    process = subprocess.Popen(["pbcopy"], stdin=subprocess.PIPE, text=True)
+    process.communicate(input=logs)
+
+  return logs
 
 
 def format_commit_messages(log):
