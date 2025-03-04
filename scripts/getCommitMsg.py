@@ -134,11 +134,30 @@ def get_commit_msg(args, branch):
       text=True,
     )
   else:
+    reflogs = subprocess.run(
+      ["git", "reflog", "show", branch],
+      stdout=subprocess.PIPE,
+      text=True,
+    ).stdout.strip()
+    
+    print("===============================================")
+    print(reflogs)
+    
+    commit_hash = re.search(
+      r"(?:rebase\s+\(finish\).*onto\s+(.*)\n)|(?:branch:\s+Created\s+from\s+refs\/remotes\/(.*)\n)|(?:branch:\s+Created\s+from\s+HEAD\ncommit\s+hsh:\s+(.*)\n)|(?:branch:\s+Created\s+from\s+HEAD(?!\ncommit\s+hsh:\s+.*\n))", reflogs
+    )
+      
+    if commit_hash is None or len(commit_hash.groups()) == 0:
+      return ""
+    else:
+      commit_hash = commit_hash.groups()[0]
+      print(f"commit hsh: {commit_hash}")
+      
     logs = subprocess.run(
       [
         "git",
         "log",
-        branch,
+        f"{commit_hash}..{branch}",
         "--format=\n- %B",
         f"--author={args.author}",
         f"--after=format:relative:{args.hours}.hours.ago",
