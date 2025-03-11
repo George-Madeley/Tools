@@ -155,6 +155,13 @@ function find_largest_files() {
     du -h -x -s -- * | sort -r -h | head -20
 }
 
+# Python
+PIPENV_VENV_IN_PROJECT=1
+
+function clear-pipenv() {
+  rm -rfv ~/.virtualenvs
+}
+
 # PS1 Prompt
 export GIT_PS1_SHOWSTASHSTATE=true
 export GIT_PS1_SHOWDIRTYSTATE=true
