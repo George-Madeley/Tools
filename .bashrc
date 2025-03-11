@@ -132,6 +132,24 @@ function git-recommit() {
   git push --force
 }
 
+function git-prune() {
+  # Fetch the latest changes from the remote
+  git fetch --prune
+
+  # Get a list of local branches
+  local_branches=$(git branch --format='%(refname:short)')
+
+  # Loop through each local branch
+  for branch in $local_branches; do
+    # Check if the branch exists on the remote
+    if ! git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+      # If the branch does not exist on the remote, delete it locally
+      git branch -D "$branch"
+      echo "Deleted local branch: $branch"
+    fi
+  done
+}
+
 # calendar
 alias jan='cal -m 01'
 alias feb='cal -m 02'
