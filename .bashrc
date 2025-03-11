@@ -1,3 +1,9 @@
+# Load profile
+if [ -f ~/.bash-profile ]; then
+    . ~/.bash-profile
+fi
+
+
 dHISTTIMEFORMAT="%F %T "
 HISTCONTROL=ignoreboth:erasedups
 HISTIGNORE=?:??:history
