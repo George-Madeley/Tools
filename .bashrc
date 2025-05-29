@@ -1,8 +1,7 @@
 # Load profile
 if [ -f ~/.bash-profile ]; then
-    . ~/.bash-profile
+  . ~/.bash-profile
 fi
-
 
 dHISTTIMEFORMAT="%F %T "
 HISTCONTROL=ignoreboth:erasedups
@@ -20,7 +19,7 @@ shopt -s direxpand dirspell
 shopt -s globstar
 
 if test -f ~/.config/git/git-prompt.sh; then
-    . ~/.config/git/git-prompt.sh
+  . ~/.config/git/git-prompt.sh
 fi
 
 # Colors
@@ -60,16 +59,16 @@ function git-publish() {
 }
 
 function git-init() {
-    if [ -z "$1" ]; then
-        printf "%s\n" "Please provide a directory name."
-    else
-        mkdir "$1"
-        builtin cd "$1"
-        pwd
-        git init
-        touch readme.md .gitignore LICENSE
-        echo "# $(basename $PWD)" >>readme.md
-    fi
+  if [ -z "$1" ]; then
+    printf "%s\n" "Please provide a directory name."
+  else
+    mkdir "$1"
+    builtin cd "$1"
+    pwd
+    git init
+    touch readme.md .gitignore LICENSE
+    echo "# $(basename $PWD)" >>readme.md
+  fi
 }
 
 function git-rename() {
@@ -97,16 +96,7 @@ function git-rename() {
 }
 
 function git-parse-branch() {
-    git branch 2>/dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
-}
-
-function git-rebase() {
-  if [ "$#" -ne 2 ]; then
-    echo "Usage: my_function <main_branch> <merge_branch>"
-    return 1
-  fi
-
-  git rebase --onto $1 $(git merge-base $2 $1) $2
+  git branch 2>/dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
 }
 
 function git-remove() {
@@ -117,19 +107,6 @@ function git-remove() {
 
   git push origin -d $1
   git branch -D $1
-}
-
-function git-recommit() {
-  if [ $# -eq 0 ]; then
-      echo "No files specified. Usage: git_recommit <file1> <file2> ..."
-      return 1
-  fi
-
-  last_commit_message=$(git log -1 --pretty=%B)
-  git reset --soft HEAD~1
-  git add "$@"
-  git commit -m "$last_commit_message"
-  git push --force
 }
 
 function git-prune() {
@@ -166,11 +143,11 @@ alias dec='cal -m 12'
 
 # Functions
 function hg() {
-    history | grep "$1"
+  history | grep "$1"
 }
 
 function find_largest_files() {
-    du -h -x -s -- * | sort -r -h | head -20
+  du -h -x -s -- * | sort -r -h | head -20
 }
 
 # Python
@@ -187,27 +164,27 @@ export GIT_PS1_SHOWUNTRACKEDFILES=true
 export GIT_PS1_SHOWUPSTREAM="auto"
 
 function bash_prompt() {
-    whoami | USERNAME=$(</dev/stdin)
+  whoami | USERNAME=$(</dev/stdin)
 
-    PIPENV_MSG=""
-    if [ "$PIPENV_ACTIVE" = "1" ]; then
-        PIPENV_MSG=" (pipenv)"
-    fi
+  PIPENV_MSG=""
+  if [ "$PIPENV_ACTIVE" = "1" ]; then
+    PIPENV_MSG=" (pipenv)"
+  fi
 
-    PS1="\n${debian_chroot:+($debian_chroot)}"
-    # set window title
-    PS1="$PS1${wht}Git | Bash v\v | \W\007\]\n"
-    # black text, magenta, 24h time
-    PS1="$PS1${pur} [\A] "
-    # black text, green, cleaned user
-    PS1="$PS1${grn} $USERNAME "
-    # black text, yellow, working directory
-    PS1="$PS1${ylw} \w "
-    # blue text, git branch
-    PS1="$PS1${cyn}$(git-parse-branch)"
-    # pipenv message
-    PS1="$PS1${red}$PIPENV_MSG"
-    PS1="$PS1${clr}\n$ "
+  PS1="\n${debian_chroot:+($debian_chroot)}"
+  # set window title
+  PS1="$PS1${wht}Git | Bash v\v | \W\007\]\n"
+  # black text, magenta, 24h time
+  PS1="$PS1${pur} [\A] "
+  # black text, green, cleaned user
+  PS1="$PS1${grn} $USERNAME "
+  # black text, yellow, working directory
+  PS1="$PS1${ylw} \w "
+  # blue text, git branch
+  PS1="$PS1${cyn}$(git-parse-branch)"
+  # pipenv message
+  PS1="$PS1${red}$PIPENV_MSG"
+  PS1="$PS1${clr}\n$ "
 }
 
 PROMPT_COMMAND=bash_prompt
