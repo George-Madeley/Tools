@@ -109,6 +109,14 @@ function git-remove() {
   git branch -D $1
 }
 
+function git-hash() {
+  if [[ "$1" == "-l" ]]; then
+    git rev-parse HEAD
+  else
+    git rev-parse --short HEAD
+  fi
+}
+
 function git-prune() {
   # Fetch the latest changes from the remote
   git fetch --prune
